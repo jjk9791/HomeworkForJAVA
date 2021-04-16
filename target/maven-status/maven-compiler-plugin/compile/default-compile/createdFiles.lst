@@ -1,0 +1,4 @@
+mapper\UserMapper.class
+syz\User.class
+controller\UserController.class
+service\UserService.class

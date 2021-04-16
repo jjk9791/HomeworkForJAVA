@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/mvc https://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+    <!--扫描controller-->
+    <context:component-scan base-package="controller"/>
+    <!--配置静态资源的位置-->
+    <mvc:default-servlet-handler/>
+    <!--配置Jackson的消息转换器-->
+    <mvc:annotation-driven content-negotiation-manager="contentNegotiationManager">
+        <mvc:message-converters>
+            <!--引用JackSon的消息转换器-->
+            <ref bean="jackson2HttpMessageConverter"/>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+    <!--jackSon start-->
+    <bean id="jackson2HttpMessageConverter" class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+        <property name="objectMapper" ref="objectMapper"/>
+    </bean>
+    <bean id="objectMapper" class="org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean"
+          p:indentOutput="true"
+          p:simpleDateFormat="yyyy-MM-dd"/>
+    <!--jackSon end-->
+
+    <!--配置多视图解析器-->
+    <bean id="contentNegotiationManager" class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
+        <property name="mediaTypes">
+            <value>
+                html=text/html
+                json=application/json
+                xml=application/xml
+            </value>
+        </property>
+    </bean>
+    <!--配置模板解析器 -->
+    <bean id="templateResolver"
+          class="org.thymeleaf.spring5.templateresolver.SpringResourceTemplateResolver">
+        <property name="prefix" value="/WEB-INF/templates/" />
+        <property name="suffix" value=".html" />
+        <!-- HTML is the default value, added here for the sake of clarity.          -->
+        <property name="templateMode" value="HTML" />
+        <!-- Template cache is true by default. Set to false if you want             -->
+        <!-- templates to be automatically updated when modified.                    -->
+        <property name="cacheable" value="true" />
+    </bean>
+    <!--配置模板引擎-->
+    <bean id="templateEngine"
+          class="org.thymeleaf.spring5.SpringTemplateEngine">
+        <property name="templateResolver" ref="templateResolver" />
+        <!-- Enabling the SpringEL compiler with Spring 4.2.4 or newer can speed up  -->
+        <!-- execution in most scenarios, but might be incompatible with specific    -->
+        <!-- cases when expressions in one template are reused across different data -->
+        <!-- ypes, so this flag is "false" by default for safer backwards            -->
+        <!-- compatibility.                                                          -->
+        <property name="enableSpringELCompiler" value="true" />
+    </bean>
+
+    <!--配置thymeleaf视图解析器-->
+    <bean class="org.thymeleaf.spring5.view.ThymeleafViewResolver">
+        <property name="templateEngine" ref="templateEngine" />
+        <property name="characterEncoding" value="utf-8"/>
+    </bean>
+
+
+    <!--配置文件上传解析器-->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="defaultEncoding" value="utf-8"/>
+        <property name="maxUploadSize" value="5000000"/>
+    </bean>
+    <!--省略拦截器的配置-->
+</beans>
